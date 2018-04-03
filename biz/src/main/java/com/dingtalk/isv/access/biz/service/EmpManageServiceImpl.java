@@ -103,4 +103,30 @@ public class EmpManageServiceImpl implements EmpManageService {
             return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrCode());
         }
     }
+
+    @Override
+    public ServiceResult<String> getUserDetailInfo(String suitKey, String corpId, String userId) {
+         bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                LogFormatter.KeyValue.getNew("suitKey", suitKey),
+                LogFormatter.KeyValue.getNew("corpId", corpId),
+                LogFormatter.KeyValue.getNew("userId", userId)
+        ));
+        try {
+            ServiceResult<CorpTokenVO> tokenSr = corpManageService.getCorpToken(suitKey, corpId);
+            String accessToken = tokenSr.getResult().getCorpToken();
+            //使用临时授权码换取用户的登录身份
+            ServiceResult<String> loginVoSr = corpRequestHelper.getUserInfoByAccessToken(accessToken, userId);
+            return loginVoSr;
+        } catch (Exception e) {
+            String errLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
+                    "系统异常" + e.toString(),
+                    LogFormatter.KeyValue.getNew("suitKey", suitKey),
+                    LogFormatter.KeyValue.getNew("corpId", corpId),
+                    LogFormatter.KeyValue.getNew("userId", userId)
+            );
+            bizLogger.error(errLog, e);
+            mainLogger.error(errLog, e);
+            return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrCode());
+        }
+    }
 }

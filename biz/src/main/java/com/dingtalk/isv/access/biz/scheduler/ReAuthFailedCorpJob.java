@@ -31,9 +31,9 @@ public class ReAuthFailedCorpJob {
                     "任务开始。。。"
             ));
             //要检测套件,ISV要换成自己的SuiteKey。做成配置项
-            String suiteKey = "suitexdhgv7mn5ufoi9ui";
+            String suiteKey = "suite3vkhu3jypnqtdjsq";
             //要检测的微应用APPID。ISV要换成自己的APPID。做成配置项
-            Long appId = 1949L;
+            Long appId = 5215L;
             ServiceResult<SuiteTokenVO> suiteTokenSr = suiteManageService.getSuiteToken(suiteKey);
             String suiteToken = suiteTokenSr.getResult().getSuiteToken();
             ServiceResult<List<UnActiveCorpVO>> corpListSr = isvRequestHelper.getUnactiveCorp(suiteToken,appId);

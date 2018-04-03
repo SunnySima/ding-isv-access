@@ -1,6 +1,10 @@
 package com.dingtalk.isv.access.biz.helper;
 
 import com.alibaba.fastjson.JSON;
+import com.dingtalk.api.DefaultDingTalkClient;
+import com.dingtalk.api.DingTalkClient;
+import com.dingtalk.api.request.CorpMessageCorpconversationAsyncsendRequest;
+import com.dingtalk.api.response.CorpMessageCorpconversationAsyncsendResponse;
 import com.dingtalk.isv.access.api.model.CorpChatVO;
 import com.dingtalk.isv.access.api.model.CorpTokenVO;
 import com.dingtalk.isv.access.api.service.CorpManageService;
@@ -14,6 +18,7 @@ import com.dingtalk.isv.access.common.model.ServiceResult;
 import com.dingtalk.open.client.api.model.corp.MessageBody;
 import com.dingtalk.open.client.api.model.corp.MessageType;
 import com.google.common.collect.Lists;
+import com.taobao.api.ApiException;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -37,16 +42,16 @@ public class CorpOapiRequestHelperTest extends BaseTestCase {
     @Resource
     private CorpChatOapiRequestHelper corpChatOapiRequestHelper;
     @Test
-    public void test(){
-        String corpId = "ding9f50b15bccd16741";
-        String ssoCorpSecret = "";
-        String corpSecret = "";
+    public void test() throws ApiException {
+        String corpId = "dingc20b6fdc2cc1c4bc35c2f4657eb6378f";
+        String ssoCorpSecret = "R-digP8rXoZFFpe4Vh-T3NkCg80XDH9w-XSqtnU_xQUvic5-vAutozW-u6F1y-cP";
+        String corpSecret = "k7qmUidgd1P4dDcjTGQxGbNIWuA-w3Svy2MoZtnQUsB2KoZkhwuAbWm47zhhb5mX";
 
         //这一组账号创建外部联系人没权限
         //corpId = "dingb428d1170d66cd7035c2f4657eb6378f";
         //corpSecret="1LSHw0oGhsky77r3qKM12nbujVl0qwuTCc56W2EM1pqzJtpu3jwvm_2RVZSXNMJz";
 
-        String suiteKey = "suitexdhgv7mn5ufoi9ui";
+        String suiteKey = "suite3vkhu3jypnqtdjsq";
         CorpTokenVO corpTokenVO = corpManageService.getCorpToken(suiteKey,corpId).getResult();
         System.err.println("corpTokenVO::::"+ JSON.toJSONString(corpTokenVO));
         /**
@@ -65,8 +70,24 @@ public class CorpOapiRequestHelperTest extends BaseTestCase {
          **/
         CorpTokenVO isvCorpTokenVO =  isvRequestHelper.getCorpToken(corpId,corpSecret).getResult();
         System.err.println("isvCorpTokenVO::::"+ JSON.toJSONString(isvCorpTokenVO));
-        List<String> chatUserList = new ArrayList<String>();
-        chatUserList.add("lifeng.zlf");
+
+        DingTalkClient client = new DefaultDingTalkClient("https://eco.taobao.com/router/rest");
+        CorpMessageCorpconversationAsyncsendRequest req = new CorpMessageCorpconversationAsyncsendRequest();
+        req.setAgentId(169836797L);
+        req.setToAllUser(true);
+        /*req.setUseridList("manager8843");
+        req.setDeptIdList("1");
+        req.setToAllUser(false);*/
+        req.setMsgtype("link");
+        req.setMsgcontentString("{\"messageUrl\": \"dingtalk://dingtalkclient/page/link?url=http%3a%2f%2fs.dingtalk.com%2fmarket%2fdingtalk%2ferror_code.php\",\n" +
+                "        \"picUrl\":\"@lALOACZwe2Rk\",\n" +
+                "        \"title\": \"测试\",\n" +
+                "        \"text\": \"测试\"}");
+        CorpMessageCorpconversationAsyncsendResponse rsp = client.execute(req, isvCorpTokenVO.getCorpToken());
+        System.out.println(rsp.getBody());
+
+        /*List<String> chatUserList = new ArrayList<String>();
+        chatUserList.add("manager8843");
         chatUserList.add("043425659249");
         chatUserList.add("06654942081038711");
         chatUserList.add("042348834225");
@@ -93,19 +114,19 @@ public class CorpOapiRequestHelperTest extends BaseTestCase {
         //        1,null,null,null);
 
         //1521055018802442297 星峰小号
-        /** **/
-        ServiceResult<String> createChatSr = corpChatOapiRequestHelper.createChat(suiteKey,corpId,isvCorpTokenVO.getCorpToken(),"浩倡573_e","1547002767868863895",null,
-                1,"ext",0L,chatExtList);//042260794833 ~~  lifeng.zlf 1521055018802442297
+        *//** **//*
+        ServiceResult<String> createChatSr = corpChatOapiRequestHelper.createChat(suiteKey,corpId,isvCorpTokenVO.getCorpToken(),"smartpark测试","manager8843",chatUserList,
+                1,"ext",0L,null);//042260794833 ~~  lifeng.zlf 1521055018802442297
         System.err.println("createChatSr::::"+JSON.toJSONString(createChatSr));
         ServiceResult<CorpChatVO> chatSr = corpChatOapiRequestHelper.getChat(suiteKey,corpId,isvCorpTokenVO.getCorpToken(),createChatSr.getResult());
         System.err.println("chatSr::::"+JSON.toJSONString(chatSr.getResult()));
         CorpChatVO corpChatVO = chatSr.getResult();
-        /**
+        *//**
         String s = "{\"chatId\":\"chat58f10d9d8fbfcbaed57da8cb27e19bbb\",\"chatName\":\"浩倡573_d\",\"conversationTag\":0,\"extIdList\":[\"1547002767868863895\",\"02200260401069719\",\"08471724461239273\",\"01592355021038074\",\"083309024829170414\",\"042260794833\",\"43391529240\",\"0639560260641536\",\"0554195521654200\",\"030801316126307056\"],\"ownerUserId\":\"1521055018802442297\",\"userIdlist\":[\"lifeng.zlf\",\"042348834225\",\"043425659249\",\"06654942081038711\",\"1521055018802442297\"]}";
         CorpChatVO corpChatVO = JSON.parseObject(s,CorpChatVO.class);
         corpChatOapiRequestHelper.updateChat(suiteKey, corpId, isvCorpTokenVO.getCorpToken(), corpChatVO.getChatId(),"浩倡573换名字","lifeng.zlf",
                 "emp",Lists.<String>newArrayList("0100024243958604"),null,Lists.newArrayList("01592355021038074"), null);
-        **/
+        **//*
 
         String chatId = corpChatVO.getChatId();
         MessageBody.OABody message = new MessageBody.OABody();
@@ -120,7 +141,7 @@ public class CorpOapiRequestHelperTest extends BaseTestCase {
         message.setBody(body);
         message.setMessage_url("http://taobao.com");
         ServiceResult<Void> sendSr = corpChatOapiRequestHelper.sendChatMsg(suiteKey,corpId,isvCorpTokenVO.getCorpToken(),chatId, MessageType.OA,message);
-        System.err.println("sendSr::::"+JSON.toJSONString(sendSr));
+        System.err.println("sendSr::::"+JSON.toJSONString(sendSr));*/
         /**
         ServiceResult<DingDepartmentVO> departmentVOSr = corpDeptOapiRequestHelper.getDeptById(suiteKey,corpId,corpTokenVO.getCorpToken(),642185L);
         System.err.println("departmentVOSr::::"+JSON.toJSONString(departmentVOSr));

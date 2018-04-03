@@ -1,5 +1,6 @@
 package com.dingtalk.isv.access.web.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.dingtalk.isv.access.api.model.CorpAppVO;
 import com.dingtalk.isv.access.api.model.CorpJSAPITicketVO;
 import com.dingtalk.isv.access.api.model.LoginUserVO;
@@ -35,22 +36,24 @@ public class JsConfigController {
     @Resource
     private EmpManageService empManageService;
     //你的套件suiteKey。这里写死,ISV自己做配置
-    private final String suiteKey= "suitexdhgv7mn5ufoi9ui";
+    private final String suiteKey = "suite3vkhu3jypnqtdjsq";
     //你的微应用appid。这里写死,ISV自己做配置
-    private final Long microappAppId = 1949L;
+    private final Long microappAppId = 5215L;
+
     /**
      * 测试微应用鉴权
+     *
      * @param url
      * @param corpId
      * @return
      */
     @RequestMapping("/get_js_config")
     @ResponseBody
-    public Map<String, Object>  getJSConfig(@RequestParam(value = "url", required = false) String url,
-                              @RequestParam(value = "corpId", required = false) String corpId
+    public Map<String, Object> getJSConfig(@RequestParam(value = "url", required = false) String url,
+                                           @RequestParam(value = "corpId", required = false) String corpId
 
     ) {
-        try{
+        try {
             bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
                     "get_js_config",
                     LogFormatter.KeyValue.getNew("url", url),
@@ -58,31 +61,45 @@ public class JsConfigController {
                     LogFormatter.KeyValue.getNew("suiteKey", suiteKey),
                     LogFormatter.KeyValue.getNew("appId", microappAppId)
             ));
-            url = check(url,corpId,suiteKey,microappAppId);
+            url = check(url, corpId, suiteKey, microappAppId);
             ServiceResult<CorpJSAPITicketVO> jsapiTicketSr = corpManageService.getCorpJSAPITicket(suiteKey, corpId);
+            bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                    "getCorpJSAPITicket",
+                    LogFormatter.KeyValue.getNew("jsapiTicketSr", JSON.toJSONString(jsapiTicketSr))
+            ));
             ServiceResult<CorpAppVO> corpAppVOSr = corpManageService.getCorpApp(corpId, microappAppId);
+            bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                    "getCorpApp",
+                    LogFormatter.KeyValue.getNew("corpAppVOSr", JSON.toJSONString(corpAppVOSr))
+            ));
+
             String nonce = com.dingtalk.oapi.lib.aes.Utils.getRandomStr(8);
             Long timeStamp = System.currentTimeMillis();
             String sign = DingTalkJsApiSingnature.getJsApiSingnature(url, nonce, timeStamp, jsapiTicketSr.getResult().getCorpJSAPITicket());
-            Map<String,Object> jsapiConfig = new HashMap<String, Object>();
-            jsapiConfig.put("signature",sign);
-            jsapiConfig.put("nonce",nonce);
-            jsapiConfig.put("timeStamp",timeStamp);
-            jsapiConfig.put("agentId",corpAppVOSr.getResult().getAgentId());
-            jsapiConfig.put("corpId",corpId);
+            Map<String, Object> jsapiConfig = new HashMap<String, Object>();
+            jsapiConfig.put("signature", sign);
+            jsapiConfig.put("nonce", nonce);
+            jsapiConfig.put("timeStamp", timeStamp);
+            jsapiConfig.put("agentId", corpAppVOSr.getResult().getAgentId());
+            jsapiConfig.put("corpId", corpId);
+            bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
+                    "get_js_config返回结果",
+                    LogFormatter.KeyValue.getNew("jsapiConfig", JSON.toJSONString(jsapiConfig))
+            ));
             return HttpResult.getSuccess(jsapiConfig);
-        }catch (Exception e){
+        } catch (Exception e) {
             bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
                     "系统错误",
                     LogFormatter.KeyValue.getNew("url", url),
                     LogFormatter.KeyValue.getNew("corpId", corpId)
-            ),e);
-            return HttpResult.getFailure(ServiceResultCode.SYS_ERROR.getErrCode(),ServiceResultCode.SYS_ERROR.getErrMsg());
+            ), e);
+            return HttpResult.getFailure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrMsg());
         }
     }
 
     /**
      * 获取用户信息
+     *
      * @param url
      * @param corpId
      * @param code
@@ -90,10 +107,10 @@ public class JsConfigController {
      */
     @RequestMapping("/get_user_info")
     @ResponseBody
-    public Map<String, Object>  getUserInfo(@RequestParam(value = "url", required = false) String url,
-                                            @RequestParam(value = "corpId", required = false) String corpId,
-                                            @RequestParam(value = "code", required = false) String code) {
-        try{
+    public Map<String, Object> getUserInfo(@RequestParam(value = "url", required = false) String url,
+                                           @RequestParam(value = "corpId", required = false) String corpId,
+                                           @RequestParam(value = "code", required = false) String code) {
+        try {
             bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
                     "get_user_info",
                     LogFormatter.KeyValue.getNew("code", code),
@@ -101,7 +118,7 @@ public class JsConfigController {
                     LogFormatter.KeyValue.getNew("appId", microappAppId)
             ));
             ServiceResult<LoginUserVO> userSr = empManageService.getEmpByAuthCode(suiteKey, corpId, code);
-            Map<String,Object> result = new HashMap<String, Object>();
+            Map<String, Object> result = new HashMap<String, Object>();
             result.put("deviceId", userSr.getResult().getDeviceId());
             result.put("userId", userSr.getResult().getUserId());
             bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
@@ -110,21 +127,59 @@ public class JsConfigController {
                     LogFormatter.KeyValue.getNew("userId", userSr.getResult().getUserId())
             ));
             return HttpResult.getSuccess(result);
-        }catch (Exception e){
+        } catch (Exception e) {
             bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
                     "get_user_info错误",
                     LogFormatter.KeyValue.getNew("url", url),
                     LogFormatter.KeyValue.getNew("corpId", corpId)
-            ),e);
-            return HttpResult.getFailure(ServiceResultCode.SYS_ERROR.getErrCode(),ServiceResultCode.SYS_ERROR.getErrMsg());
+            ), e);
+            return HttpResult.getFailure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrMsg());
         }
     }
 
 
-
-    private String check(String url,String corpId,String suiteKey,Long appId) throws Exception{//TODO 妈蛋的就然没有定义serviceexception
+    /**
+     * 获取用户信息
+     *
+     * @param url
+     * @param corpId
+     * @param userId
+     * @return
+     */
+    @RequestMapping("/get_user_detail")
+    @ResponseBody
+    public Map<String, Object> getUserDetailInfo(@RequestParam(value = "url", required = false) String url,
+                                                 @RequestParam(value = "corpId", required = false) String corpId,
+                                                 @RequestParam(value = "userId", required = true) String userId) {
         try {
-            url = URLDecoder.decode(url,"UTF-8");
+            bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                    "get_user_detail",
+                    LogFormatter.KeyValue.getNew("userId", url),
+                    LogFormatter.KeyValue.getNew("suiteKey", suiteKey),
+                    LogFormatter.KeyValue.getNew("appId", microappAppId)
+            ));
+            ServiceResult<String> userSr = empManageService.getUserDetailInfo(suiteKey, corpId, userId);
+            Map<String, Object> result = new HashMap<String, Object>();
+            result.put("result", userSr);
+            bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
+                    "get_user_detail",
+                    LogFormatter.KeyValue.getNew("result", result)
+            ));
+            return HttpResult.getSuccess(result);
+        } catch (Exception e) {
+            bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
+                    "get_user_detail错误",
+                    LogFormatter.KeyValue.getNew("url", url),
+                    LogFormatter.KeyValue.getNew("corpId", corpId)
+            ), e);
+            return HttpResult.getFailure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrMsg());
+        }
+    }
+
+
+    private String check(String url, String corpId, String suiteKey, Long appId) throws Exception {//TODO 妈蛋的就然没有定义serviceexception
+        try {
+            url = URLDecoder.decode(url, "UTF-8");
             URL urler = new URL(url);
             StringBuffer urlBuffer = new StringBuffer();
             urlBuffer.append(urler.getProtocol());

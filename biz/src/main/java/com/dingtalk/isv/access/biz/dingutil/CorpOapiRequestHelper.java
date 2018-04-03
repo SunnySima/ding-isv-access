@@ -48,9 +48,10 @@ public class CorpOapiRequestHelper {
 
     /**
      * 获取企业管理员
-     * @param suiteKey      套件SuiteKey
-     * @param corpId        授权企业的CorpId
-     * @param accessToken   授权企业的AccessToken
+     *
+     * @param suiteKey    套件SuiteKey
+     * @param corpId      授权企业的CorpId
+     * @param accessToken 授权企业的AccessToken
      * @return
      */
     public ServiceResult<List<EmpVO>> getCorpAdmin(String suiteKey, String corpId, String accessToken) {
@@ -62,21 +63,21 @@ public class CorpOapiRequestHelper {
             if (Long.valueOf(0).equals(errCode)) {
                 List<EmpVO> empVOList = new ArrayList<EmpVO>();
                 JSONArray jsonArray = jsonObject.getJSONArray("userlist");
-                for(int i=0;i<jsonArray.size();i++){
+                for (int i = 0; i < jsonArray.size(); i++) {
                     JSONObject userObject = jsonArray.getJSONObject(i);
                     EmpVO empVO = new EmpVO();
                     empVO.setActive(userObject.getBoolean("active"));
                     empVO.setAvatar(userObject.getString("avatar"));
-                    empVO.setDepartment(JSONArray.parseArray(userObject.getJSONArray("department").toJSONString(),Long.class));
+                    empVO.setDepartment(JSONArray.parseArray(userObject.getJSONArray("department").toJSONString(), Long.class));
                     empVO.setDingId(userObject.getString("dingId"));
                     empVO.setIsAdmin(userObject.getBoolean("isAdmin"));
                     empVO.setIsBoss(userObject.getBoolean("isBoss"));
                     empVO.setIsHide(userObject.getBoolean("isHide"));
-                    empVO.setIsLeaderInDepts((Map)JSON.parseObject(userObject.getString("isLeaderInDepts")));
+                    empVO.setIsLeaderInDepts((Map) JSON.parseObject(userObject.getString("isLeaderInDepts")));
                     empVO.setIsSuper(userObject.getBoolean("isSuper"));
                     empVO.setJobnumber(userObject.getString("jobnumber"));
                     empVO.setName(userObject.getString("name"));
-                    empVO.setOrderInDepts((Map)JSON.parseObject(userObject.getString("orderInDepts")));
+                    empVO.setOrderInDepts((Map) JSON.parseObject(userObject.getString("orderInDepts")));
                     empVO.setPosition(userObject.getString("position"));
                     empVO.setStaffId(userObject.getString("userid"));
                     empVOList.add(empVO);
@@ -98,9 +99,10 @@ public class CorpOapiRequestHelper {
 
     /**
      * 获取注册企业的回调信息
-     * @param suiteKey      套件SuiteKey
-     * @param corpId        授权企业的CorpId
-     * @param accessToken   授权企业的AccessToken
+     *
+     * @param suiteKey    套件SuiteKey
+     * @param corpId      授权企业的CorpId
+     * @param accessToken 授权企业的AccessToken
      * @return
      */
     public ServiceResult<CorpSuiteCallBackVO> getCorpSuiteCallback(String suiteKey, String corpId, String accessToken) {
@@ -110,9 +112,9 @@ public class CorpOapiRequestHelper {
             JSONObject jsonObject = JSON.parseObject(sr);
             Long errCode = jsonObject.getLong("errcode");
             if (Long.valueOf(0).equals(errCode)) {
-                JSONArray callBackArr =  jsonObject.getJSONArray("call_back_tag");
+                JSONArray callBackArr = jsonObject.getJSONArray("call_back_tag");
                 List<String> callBackTagList = new ArrayList<String>();
-                for(int i=0;i<callBackArr.size();i++){
+                for (int i = 0; i < callBackArr.size(); i++) {
                     String callBackTag = callBackArr.getString(i);
                     callBackTagList.add(callBackTag);
                 }
@@ -138,13 +140,14 @@ public class CorpOapiRequestHelper {
 
     /**
      * 注册授权企业的企业信息变更回调地址。企业数据发生变更时候,钉钉开放平台会向注册的URL地址POST数据
-     * @param suiteKey      套件SuiteKey
-     * @param corpId        授权企业的CorpId
-     * @param accessToken   授权企业的AccessToken
-     * @param token         用于解密钉钉开放平台推送数据的解密Token
-     * @param aesKey        用于解密钉钉开放平台推送数据的解密AesKey
-     * @param callBakUrl    用于接收钉钉开放平台推送数据的URL
-     * @param tagList       注册回调事件的事件列表。
+     *
+     * @param suiteKey    套件SuiteKey
+     * @param corpId      授权企业的CorpId
+     * @param accessToken 授权企业的AccessToken
+     * @param token       用于解密钉钉开放平台推送数据的解密Token
+     * @param aesKey      用于解密钉钉开放平台推送数据的解密AesKey
+     * @param callBakUrl  用于接收钉钉开放平台推送数据的URL
+     * @param tagList     注册回调事件的事件列表。
      */
     public ServiceResult<Void> registerCorpCallback(String suiteKey, String corpId, String accessToken, String token, String aesKey, String callBakUrl, List<String> tagList) {
         bizLogger.error(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
@@ -169,13 +172,13 @@ public class CorpOapiRequestHelper {
             if (Long.valueOf(0).equals(errCode)) {
                 return ServiceResult.success(null);
             }
-            if(Long.valueOf(71006).equals(errCode)){
+            if (Long.valueOf(71006).equals(errCode)) {
                 return ServiceResult.failure(ServiceResultCode.CORP_SUITE_CALLBACK_EXIST.getErrCode(), ServiceResultCode.CORP_SUITE_CALLBACK_EXIST.getErrMsg());
             }
             return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrMsg());
         } catch (Exception e) {
             String errLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
-                    "系统异常"+e.toString()
+                    "系统异常" + e.toString()
             );
             bizLogger.error(errLog, e);
             mainLogger.error(errLog, e);
@@ -185,13 +188,14 @@ public class CorpOapiRequestHelper {
 
     /**
      * 更新授权企业的企业信息变更回调地址。企业数据发生变更时候,钉钉开放平台会向注册的URL地址POST数据
-     * @param suiteKey      套件SuiteKey
-     * @param corpId        授权企业的CorpId
-     * @param accessToken   授权企业的AccessToken
-     * @param token         用于解密钉钉开放平台推送数据的解密Token
-     * @param aesKey        用于解密钉钉开放平台推送数据的解密AesKey
-     * @param callBakUrl    用于接收钉钉开放平台推送数据的URL
-     * @param tagList       注册回调事件的事件列表。
+     *
+     * @param suiteKey    套件SuiteKey
+     * @param corpId      授权企业的CorpId
+     * @param accessToken 授权企业的AccessToken
+     * @param token       用于解密钉钉开放平台推送数据的解密Token
+     * @param aesKey      用于解密钉钉开放平台推送数据的解密AesKey
+     * @param callBakUrl  用于接收钉钉开放平台推送数据的URL
+     * @param tagList     注册回调事件的事件列表。
      */
     public ServiceResult<Void> updateCorpCallback(String suiteKey, String corpId, String accessToken, String token, String aesKey, String callBakUrl, List<String> tagList) {
         try {
@@ -226,9 +230,10 @@ public class CorpOapiRequestHelper {
      * 删除授权企业的回调。
      * 在企业对套件解除授权的时候,钉钉会自动删除ISV注册的企业回调。
      * 因为在套件解除授权的时候,这个接口已经不能调用了。因为ISV无法在使用企业授权调用开放平台接口了
-     * @param suiteKey      套件SuiteKey
-     * @param corpId        授权企业的CorpId
-     * @param accessToken   授权企业的AccessToken
+     *
+     * @param suiteKey    套件SuiteKey
+     * @param corpId      授权企业的CorpId
+     * @param accessToken 授权企业的AccessToken
      * @return
      */
     public ServiceResult<Void> deleteCorpSuiteCallback(String suiteKey, String corpId, String accessToken) {
@@ -254,15 +259,27 @@ public class CorpOapiRequestHelper {
 
     /**
      * 免登,根据code获取用户信息
-     * @param suiteKey      套件SuiteKey
-     * @param corpId        授权企业CorpId
-     * @param accessToken   授权企业AccessToken
-     * @param code          授权企业员工免登Code
+     *
+     * @param suiteKey    套件SuiteKey
+     * @param corpId      授权企业CorpId
+     * @param accessToken 授权企业AccessToken
+     * @param code        授权企业员工免登Code
      */
-    public ServiceResult<LoginUserVO> getEmpByAuthCode(String suiteKey, String corpId, String accessToken,String code) {
+    public ServiceResult<LoginUserVO> getEmpByAuthCode(String suiteKey, String corpId, String accessToken, String code) {
+        String userLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                "免登CODE换取用户信息开始",
+                LogFormatter.KeyValue.getNew("suiteKey", suiteKey),
+                LogFormatter.KeyValue.getNew("corpId", corpId),
+                LogFormatter.KeyValue.getNew("accessToken", accessToken),
+                LogFormatter.KeyValue.getNew("code", code));
+        bizLogger.info(userLog);
         try {
-            String url = getOapiDomain() + "/user/getuserinfo?access_token=" + accessToken+"&code="+code;
+            String url = getOapiDomain() + "/user/getuserinfo?access_token=" + accessToken + "&code=" + code;
             String result = httpRequestHelper.doHttpGet(url);
+            String resultLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                    "用户信息获取结果",
+                    LogFormatter.KeyValue.getNew("result", result));
+            bizLogger.info(resultLog);
             JSONObject jsonObject = JSON.parseObject(result);
             Long errCode = jsonObject.getLong("errcode");
             if (errCode == 0) {
@@ -285,20 +302,21 @@ public class CorpOapiRequestHelper {
             );
             bizLogger.error(errLog, e);
             mainLogger.error(errLog, e);
-            return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(),ServiceResultCode.SYS_ERROR.getErrCode());
+            return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrCode());
         }
     }
 
     /**
      * 根据SSOCode来换取用户在钉钉OA后台的免登身份信息
+     *
      * @param isvCorpId ISV企业CorpId
      * @param ssoToken  ISV企业SSOToken
      * @param ssoCode   OA后台免登临时授权码
      * @return
      */
-    public ServiceResult<OALoginUserVO> getEmpBySSOCode(String isvCorpId, String ssoToken,String ssoCode) {
+    public ServiceResult<OALoginUserVO> getEmpBySSOCode(String isvCorpId, String ssoToken, String ssoCode) {
         try {
-            String url = getOapiDomain() + "/sso/getuserinfo?access_token=" + ssoToken+"&code="+ssoCode;
+            String url = getOapiDomain() + "/sso/getuserinfo?access_token=" + ssoToken + "&code=" + ssoCode;
             String result = httpRequestHelper.doHttpGet(url);
             System.err.println(result);
             JSONObject jsonObject = JSON.parseObject(result);
@@ -325,12 +343,45 @@ public class CorpOapiRequestHelper {
             );
             bizLogger.error(errLog, e);
             mainLogger.error(errLog, e);
-            return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(),ServiceResultCode.SYS_ERROR.getErrCode());
+            return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrCode());
         }
     }
 
 
-
+    /**
+     * 获取成员详情
+     *
+     * @param accessToken 调用接口凭证
+     * @param userId      员工在企业内的UserID，企业用来唯一标识用户的字段
+     */
+    public ServiceResult<String> getUserInfoByAccessToken(String accessToken, String userId) {
+        String userLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                "获取成员详情开始",
+                LogFormatter.KeyValue.getNew("accessToken", accessToken),
+                LogFormatter.KeyValue.getNew("userId", userId)
+        );
+        bizLogger.info(userLog);
+        try {
+            String url = getOapiDomain() + "/user/get?access_token=" + accessToken + "&userid=" + userId;
+            String result = httpRequestHelper.doHttpGet(url);
+            String resultLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                    "获取成员详情结果",
+                    LogFormatter.KeyValue.getNew("url", url),
+                    LogFormatter.KeyValue.getNew("result", result)
+            );
+            bizLogger.info(resultLog);
+            return ServiceResult.success(result);
+        } catch (Exception e) {
+            String errLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
+                    "获取成员详情失败",
+                    LogFormatter.KeyValue.getNew("accessToken", accessToken),
+                    LogFormatter.KeyValue.getNew("userId", userId)
+            );
+            bizLogger.error(errLog, e);
+            mainLogger.error(errLog, e);
+            return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrCode());
+        }
+    }
 
 }
 

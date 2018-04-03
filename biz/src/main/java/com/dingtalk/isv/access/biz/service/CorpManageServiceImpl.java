@@ -57,6 +57,7 @@ public class CorpManageServiceImpl implements CorpManageService {
     private ConfOapiRequestHelper confOapiRequestHelper;
     @Resource
     private ISVBizLockService isvBizLockService;
+
     @Override
     public ServiceResult<Void> saveOrUpdateCorp(CorpVO corpVO) {
         bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
@@ -113,7 +114,7 @@ public class CorpManageServiceImpl implements CorpManageService {
                 LogFormatter.KeyValue.getNew("suiteKey", suiteKey),
                 LogFormatter.KeyValue.getNew("corpId", corpId)
         ));
-        String lockKey = "corp_token_"+suiteKey+"_"+corpId;
+        String lockKey = "corp_token_" + suiteKey + "_" + corpId;
         try {
             CorpTokenDO corpTokenDO = corpTokenDao.getCorpToken(suiteKey, corpId);
             Calendar calendar = Calendar.getInstance();
@@ -121,8 +122,8 @@ public class CorpManageServiceImpl implements CorpManageService {
             calendar.add(Calendar.MINUTE, 10);//为了防止误差,提前10分钟更新corptoken
             if (null == corpTokenDO || calendar.getTime().compareTo(corpTokenDO.getExpiredTime()) != -1) {
                 //如果CorpToken不存在或者将要过期,那么重新请求开放平台获取一个新的CorpToken
-                ServiceResult<ISVBizLockVO> lockSr = isvBizLockService.getISVBizLock(lockKey,new Date(System.currentTimeMillis()+1000*60));
-                if(lockSr.isSuccess()){
+                ServiceResult<ISVBizLockVO> lockSr = isvBizLockService.getISVBizLock(lockKey, new Date(System.currentTimeMillis() + 1000 * 60));
+                if (lockSr.isSuccess()) {
                     ServiceResult<SuiteTokenVO> suiteTokenVOSr = suiteManageService.getSuiteToken(suiteKey);
                     String suiteToken = suiteTokenVOSr.getResult().getSuiteToken();
                     ServiceResult<CorpSuiteAuthVO> authSr = corpSuiteAuthService.getCorpSuiteAuth(corpId, suiteKey);
@@ -138,7 +139,7 @@ public class CorpManageServiceImpl implements CorpManageService {
                     corpTokenVO.setExpiredTime(calendar.getTime());
                     this.saveOrUpdateCorpToken(corpTokenVO);
                     corpTokenDO = CorpTokenConverter.CorpTokenVO2CorpTokenDO(corpTokenVO);
-                }else{
+                } else {
                     //正常情况下不会有太多的获取锁失败的日志打出来。
                     //一旦发现获取锁失败的日志打印多,一是并发量大,二是DB异常。请开发者关注
                     String errLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
@@ -149,7 +150,7 @@ public class CorpManageServiceImpl implements CorpManageService {
                     );
                     bizLogger.error(errLog);
                     mainLogger.error(errLog);
-                    return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(),"获取CorpToken过程中获取锁失败");
+                    return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), "获取CorpToken过程中获取锁失败");
                 }
             }
             CorpTokenVO corpTokenVO = CorpTokenConverter.CorpTokenDO2CorpTokenVO(corpTokenDO);
@@ -163,7 +164,7 @@ public class CorpManageServiceImpl implements CorpManageService {
             bizLogger.error(errLog, e);
             mainLogger.error(errLog, e);
             return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrMsg());
-        }finally {
+        } finally {
             isvBizLockService.removeISVBizLock(lockKey);
         }
     }
@@ -199,10 +200,10 @@ public class CorpManageServiceImpl implements CorpManageService {
                 LogFormatter.KeyValue.getNew("suiteKey", suiteKey),
                 LogFormatter.KeyValue.getNew("corpId", corpId)
         ));
-        try{
-            corpChannelTokenDao.deleteCorpChannelToken(suiteKey,corpId);
+        try {
+            corpChannelTokenDao.deleteCorpChannelToken(suiteKey, corpId);
             return ServiceResult.success(null);
-        }catch (Exception e){
+        } catch (Exception e) {
             bizLogger.error(LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
                     "系统异常" + e.toString(),
                     LogFormatter.KeyValue.getNew("suiteKey", suiteKey),
@@ -244,7 +245,7 @@ public class CorpManageServiceImpl implements CorpManageService {
                 LogFormatter.KeyValue.getNew("suiteKey", suiteKey),
                 LogFormatter.KeyValue.getNew("corpId", corpId)
         ));
-        String jsTicketLockKey = "jsapi_ticlet_"+suiteKey+"_"+corpId;
+        String jsTicketLockKey = "jsapi_ticlet_" + suiteKey + "_" + corpId;
         try {
             CorpJSAPITicketDO corpJSTicketDO = corpJSAPITicketDao.getCorpJSAPITicket(suiteKey, corpId);
             Calendar calendar = Calendar.getInstance();
@@ -252,12 +253,12 @@ public class CorpManageServiceImpl implements CorpManageService {
             calendar.add(Calendar.MINUTE, 10);//为了防止误差,提前10分钟更新jsticket
             if (null == corpJSTicketDO || calendar.getTime().compareTo(corpJSTicketDO.getExpiredTime()) != -1) {
                 //加锁,更新JSTicket。一定要加锁。否则JSTicket是会被覆盖的
-                ServiceResult<ISVBizLockVO> lockSr = isvBizLockService.getISVBizLock(jsTicketLockKey,new Date(System.currentTimeMillis()+1000*60));
-                if(lockSr.isSuccess()){
+                ServiceResult<ISVBizLockVO> lockSr = isvBizLockService.getISVBizLock(jsTicketLockKey, new Date(System.currentTimeMillis() + 1000 * 60));
+                if (lockSr.isSuccess()) {
                     ServiceResult<CorpTokenVO> corpTokenVoSr = this.getCorpToken(suiteKey, corpId);
                     String corpToken = corpTokenVoSr.getResult().getCorpToken();
                     ServiceResult<CorpJSAPITicketVO> jsAPITicketSr = confOapiRequestHelper.getJSTicket(suiteKey, corpId, corpToken);
-                    if(!jsAPITicketSr.isSuccess() || null==jsAPITicketSr.getResult()){
+                    if (!jsAPITicketSr.isSuccess() || null == jsAPITicketSr.getResult()) {
                         String errLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
                                 "获取JSAPITicket失败",
                                 jsAPITicketSr.getCode(),
@@ -266,11 +267,11 @@ public class CorpManageServiceImpl implements CorpManageService {
                         );
                         bizLogger.error(errLog);
                         mainLogger.error(errLog);
-                        return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(),"获取JSAPITicket失败");
+                        return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), "获取JSAPITicket失败");
                     }
                     corpJSTicketDO = CorpJSAPITicketConverter.corpJSTicketVO2CorpJSTicketDO(jsAPITicketSr.getResult());
                     corpJSAPITicketDao.saveOrUpdateCorpJSAPITicket(corpJSTicketDO);
-                }else{
+                } else {
                     //正常情况下不会有太多的获取锁失败的日志打出来。
                     //一旦发现获取锁失败的日志打印多,一是并发量大,二是DB异常。请开发者关注
                     String errLog = LogFormatter.getKVLogData(LogFormatter.LogEvent.END,
@@ -281,7 +282,7 @@ public class CorpManageServiceImpl implements CorpManageService {
                     );
                     bizLogger.error(errLog);
                     mainLogger.error(errLog);
-                    return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(),"获取JSAPITicket锁失败");
+                    return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), "获取JSAPITicket锁失败");
                 }
             }
             CorpJSAPITicketVO corpJSTicketVO = CorpJSAPITicketConverter.corpJSTicketDO2CorpJSTicketVO(corpJSTicketDO);
@@ -296,7 +297,7 @@ public class CorpManageServiceImpl implements CorpManageService {
             bizLogger.error(errLog, e);
             mainLogger.error(errLog, e);
             return ServiceResult.failure(ServiceResultCode.SYS_ERROR.getErrCode(), ServiceResultCode.SYS_ERROR.getErrMsg());
-        }finally {
+        } finally {
             isvBizLockService.removeISVBizLock(jsTicketLockKey);
         }
     }
@@ -347,6 +348,10 @@ public class CorpManageServiceImpl implements CorpManageService {
         ));
         try {
             CorpAppDO corpAppDO = corpAppDao.getCorpApp(corpId, appId);
+            bizLogger.info(LogFormatter.getKVLogData(LogFormatter.LogEvent.START,
+                    "getCorpApp",
+                    LogFormatter.KeyValue.getNew("corpAppDO", JSON.toJSONString(corpAppDO))
+            ));
             if (null == corpAppDO) {
                 return ServiceResult.success(null);
             }
@@ -387,7 +392,7 @@ public class CorpManageServiceImpl implements CorpManageService {
                 ServiceResult<CorpChannelTokenVO> sr = confOapiRequestHelper.getCorpChannelToken(suiteKey, corpId, chPermanentCode, suiteToken);
                 corpChannelTokenDO = CorpChannelTokenConverter.corpChTokenVO2CorpChTokenDO(sr.getResult());
                 corpChannelTokenDao.saveOrUpdateCorpChannelToken(corpChannelTokenDO);
-                corpChannelTokenDO = corpChannelTokenDao.getCorpChannelToken(suiteKey,corpId);
+                corpChannelTokenDO = corpChannelTokenDao.getCorpChannelToken(suiteKey, corpId);
             }
             CorpChannelTokenVO corpChannelTokenVO = CorpChannelTokenConverter.corpChTokenDO2CorpChTokenVO(corpChannelTokenDO);
             return ServiceResult.success(corpChannelTokenVO);

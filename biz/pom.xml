@@ -245,6 +245,14 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.dingtalk.api</groupId>
+            <artifactId>taobao-sdk-java</artifactId>
+            <version>auto_1479188381469-20180330</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/taobao-sdk-java-auto_1479188381469-20180330.jar</systemPath>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -19,9 +19,9 @@ public class SendMessageServiceTest  extends BaseTestCase {
     @Test
     public void test_sendMessage() {
         Long start = System.currentTimeMillis();
-        String suiteKey="suiteytzpzchcpug3xpsm";
-        String corpId = "ding4ed6d279061db5e7";
-        Long appId = -23L;
+        String suiteKey="suite3vkhu3jypnqtdjsq";
+        String corpId = "dingc20b6fdc2cc1c4bc35c2f4657eb6378f";
+        Long appId = 5225L;
         MessageBody.OABody message = new MessageBody.OABody();
         MessageBody.OABody.Head head = new MessageBody.OABody.Head();
         MessageBody.OABody.Body body = new MessageBody.OABody.Body();
@@ -34,9 +34,9 @@ public class SendMessageServiceTest  extends BaseTestCase {
         //body.setTitle("http://qr.dingtalk.com/page/crminfo?appid=-23&corpid=%24"+corpId+"%24&staffid=\"\"");
         message.setHead(head);
         message.setBody(body);
-        message.setMessage_url("http://qr.dingtalk.com/page/crminfo?appid=-23&corpid=%24"+corpId+"%24");
+        message.setMessage_url("http://qr.dingtalk.com/page/crminfo?appid=5225&corpid="+corpId);
         //020434228123 qianxun   0566581316 fuxi dd_test
-        ServiceResult<Void> sr = sendMessageService.sendOAMessageToUser(suiteKey, corpId, appId, "oa", Arrays.asList("dd_test"),null,message);
+        ServiceResult<Void> sr = sendMessageService.sendOAMessageToUser(suiteKey, corpId, appId, "oa", Arrays.asList("manager8843", "0520526929734025", "16456261903649"),null,message);
         System.err.println("cost:"+(System.currentTimeMillis()-start));
         System.err.println(JSON.toJSONString(sr));
     }

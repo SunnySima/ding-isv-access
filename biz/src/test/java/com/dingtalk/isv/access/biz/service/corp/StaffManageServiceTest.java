@@ -21,9 +21,9 @@ public class StaffManageServiceTest extends BaseTestCase {
 
     @Test
     public void test_getStaff() {
-        String suiteKey= "suiteytzpzchcpug3xpsm";
-        String corpId = "ding4ed6d279061db5e7";
-        String staffId = "dd_test";
+        String suiteKey= "suite3vkhu3jypnqtdjsq";
+        String corpId = "dingc20b6fdc2cc1c4bc35c2f4657eb6378f";
+        String staffId = "manager8843";
         ServiceResult<EmpVO> sr = empManageService.getEmpByUserId(staffId,corpId,suiteKey);
         System.err.println(JSON.toJSON(sr));
     }
@@ -31,9 +31,9 @@ public class StaffManageServiceTest extends BaseTestCase {
 
     @Test
     public void test_getStaffByCode(){
-        String suiteKey= "suiteytzpzchcpug3xpsm";
-        String corpId = "ding4ed6d279061db5e7";
-        List<String> users = Arrays.asList("dd_test");
+        String suiteKey= "suite3vkhu3jypnqtdjsq";
+        String corpId = "dingc20b6fdc2cc1c4bc35c2f4657eb6378f";
+        List<String> users = Arrays.asList("manager8843");
         ServiceResult<LoginUserVO> userSr = empManageService.getEmpByAuthCode(suiteKey, corpId, "1xxxx");
         System.out.print(JSON.toJSON(userSr));
     }

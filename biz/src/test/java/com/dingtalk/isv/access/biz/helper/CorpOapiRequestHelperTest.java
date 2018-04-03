@@ -78,11 +78,8 @@ public class CorpOapiRequestHelperTest extends BaseTestCase {
         /*req.setUseridList("manager8843");
         req.setDeptIdList("1");
         req.setToAllUser(false);*/
-        req.setMsgtype("link");
-        req.setMsgcontentString("{\"messageUrl\": \"dingtalk://dingtalkclient/page/link?url=http%3a%2f%2fs.dingtalk.com%2fmarket%2fdingtalk%2ferror_code.php\",\n" +
-                "        \"picUrl\":\"@lALOACZwe2Rk\",\n" +
-                "        \"title\": \"测试\",\n" +
-                "        \"text\": \"测试\"}");
+        req.setMsgtype("text");
+        req.setMsgcontentString("{\"content\": \"这是一条测试消息\"}");
         CorpMessageCorpconversationAsyncsendResponse rsp = client.execute(req, isvCorpTokenVO.getCorpToken());
         System.out.println(rsp.getBody());
 
